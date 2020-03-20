@@ -1,0 +1,22 @@
+- hosts: jitsi-meet
+  remote_user: jitsi
+  become: true
+  vars:
+    certbot_admin_email: email@test.com
+    certbot_create_if_missing: true
+    certbot_auto_renew_user: jitsi
+    certbot_auto_renew_minute: "20"
+    certbot_auto_renew_hour: "5"
+    certbot_create_standalone_stop_services: []
+    certbot_certs:
+      - domains:
+          - meet.test.com
+  pre_tasks:
+    - name: update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 600
+  roles:
+    - role: geerlingguy.certbot # install certbot for letsencrypt
+    - role: geerlingguy.nginx # install nginx
+    - role: "{{ playbook_dir }}"

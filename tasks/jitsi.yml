@@ -1,0 +1,45 @@
+---
+
+# based on: https://github.com/jitsi/jitsi-meet/blob/master/doc/quick-install.md
+
+- name: install apt-transport-https
+  apt:
+    name: apt-transport-https
+    state: latest
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Configure signing key for Jitsi repository.
+  apt_key:
+    id: 66A9CD0595D6AFA247290D3BEF8B479E2DC1389C
+    url: "https://download.jitsi.org/jitsi-key.gpg.key"
+    state: present
+
+- name: add jitsi apt respository
+  apt_repository:
+      repo: 'deb https://download.jitsi.org stable/'
+      filename: /etc/apt/sources.list.d/jitsi
+      state: present
+
+- name: Update apt-get repo and cache
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+
+- name: Set debconf options for jitsi-meet.
+  debconf:
+    name: "{{ item.name }}"
+    question: "{{ item.question }}"
+    value: "{{ item.value }}"
+    vtype: "{{ item.vtype }}"
+  with_items: "{{ jitsi_meet_debconf_settings }}"
+
+- name: Install Jitsi Meet
+  apt:
+    name: jitsi-meet
+    state: latest
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: create nginx config
+  include: nginx.yml
